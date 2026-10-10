@@ -1,14 +1,13 @@
-
 import { useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
-  Pressable,
   View,
 } from 'react-native';
 
@@ -22,7 +21,9 @@ export function LoginScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleLogin() {
-    if (!username.trim() || !password) {
+    const normalizedUsername = username.trim();
+
+    if (!normalizedUsername || !password) {
       Alert.alert(
         'Campos obrigatórios',
         'Informe seu usuário e sua senha.',
@@ -34,14 +35,14 @@ export function LoginScreen() {
       setIsSubmitting(true);
 
       await login({
-        username: username.trim(),
+        username: normalizedUsername,
         password,
       });
-    } catch (error) {
+    } catch (error: unknown) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Não foi possível realizar o login.';
+          : 'Não foi possível realizar o login. Tente novamente.';
 
       Alert.alert('Falha no login', message);
     } finally {
@@ -56,14 +57,17 @@ export function LoginScreen() {
     >
       <View style={styles.card}>
         <Text style={styles.title}>askFlow</Text>
+
         <Text style={styles.subtitle}>
           Organize suas tarefas com facilidade
         </Text>
 
         <Text style={styles.label}>Usuário</Text>
+
         <TextInput
           style={styles.input}
           placeholder="Digite seu usuário"
+          placeholderTextColor="#94A3B8"
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
@@ -74,24 +78,33 @@ export function LoginScreen() {
         />
 
         <Text style={styles.label}>Senha</Text>
+
         <TextInput
           style={styles.input}
           placeholder="Digite sua senha"
+          placeholderTextColor="#94A3B8"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
           editable={!isSubmitting}
           accessibilityLabel="Senha"
           returnKeyType="done"
-          onSubmitEditing={() => void handleLogin()}
+          onSubmitEditing={() => {
+            void handleLogin();
+          }}
         />
 
         <Pressable
-          style={[
+          style={({ pressed }) => [
             styles.button,
+            pressed && styles.buttonPressed,
             isSubmitting && styles.buttonDisabled,
           ]}
-          onPress={() => void handleLogin()}
+          onPress={() => {
+            void handleLogin();
+          }}
           disabled={isSubmitting}
           accessibilityRole="button"
           accessibilityLabel="Entrar na aplicação"
@@ -103,8 +116,14 @@ export function LoginScreen() {
           )}
         </Pressable>
 
-        <Text style={styles.hint}>
-          Acesso de teste: admin / 123 ou user / 123
+        <Text style={styles.hint}>Acesso de teste</Text>
+
+        <Text style={styles.credentials}>
+          Administrador: admin / 123
+        </Text>
+
+        <Text style={styles.credentials}>
+          Usuário comum: user / 123
         </Text>
       </View>
     </KeyboardAvoidingView>
@@ -123,6 +142,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     elevation: 4,
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   title: {
     fontSize: 32,
@@ -161,6 +187,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 4,
   },
+  buttonPressed: {
+    opacity: 0.85,
+  },
   buttonDisabled: {
     opacity: 0.6,
   },
@@ -171,6 +200,13 @@ const styles = StyleSheet.create({
   },
   hint: {
     marginTop: 20,
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#64748B',
+    fontWeight: '600',
+  },
+  credentials: {
+    marginTop: 5,
     fontSize: 12,
     textAlign: 'center',
     color: '#64748B',

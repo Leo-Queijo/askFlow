@@ -1,4 +1,3 @@
-
 import {
   createContext,
   useCallback,
@@ -46,9 +45,9 @@ const users: Array<User & { password: string }> = [
   },
 ];
 
-export const AuthContext = createContext<AuthContextData | undefined>(
-  undefined,
-);
+export const AuthContext = createContext<
+  AuthContextData | undefined
+>(undefined);
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
@@ -71,7 +70,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
 
   const login = useCallback(
-    async ({ username, password }: LoginCredentials): Promise<void> => {
+    async ({
+      username,
+      password,
+    }: LoginCredentials): Promise<void> => {
       const normalizedUsername = username.trim();
 
       const foundUser = users.find(
@@ -104,7 +106,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, login, logout }}
+      value={{
+        user,
+        isLoading,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
