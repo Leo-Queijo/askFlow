@@ -1,80 +1,72 @@
-
-import { useState } from 'react';
+import { router } from 'expo-router';
+import { useState } from "react";
 import {
-  ActivityIndicator,
-  FlatList,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+    ActivityIndicator,
+    FlatList,
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 
-import { useTasks } from '@/hooks/useTasks';
-import type {
-  Task,
-  TaskStatusFilter,
-} from '@/types/task';
+import { useTasks } from "@/hooks/useTasks";
+import type { Task, TaskStatusFilter } from "@/types/task";
 
 const filters: {
   label: string;
   value: TaskStatusFilter;
 }[] = [
-  { label: 'Todas', value: 'todas' },
-  { label: 'Pendentes', value: 'pendente' },
-  { label: 'Em andamento', value: 'em_andamento' },
-  { label: 'Concluídas', value: 'concluida' },
+  { label: "Todas", value: "todas" },
+  { label: "Pendentes", value: "pendente" },
+  { label: "Em andamento", value: "em_andamento" },
+  { label: "Concluídas", value: "concluida" },
 ];
 
 const statusLabels = {
-  pendente: 'Pendente',
-  em_andamento: 'Em andamento',
-  concluida: 'Concluída',
+  pendente: "Pendente",
+  em_andamento: "Em andamento",
+  concluida: "Concluída",
 };
 
 export default function TaskListScreen() {
-  const {
-    loading,
-    error,
-    filterTasks,
-    refreshTasks,
-  } = useTasks();
+  const { loading, error, filterTasks, refreshTasks } = useTasks();
 
   const [selectedFilter, setSelectedFilter] =
-    useState<TaskStatusFilter>('todas');
+    useState<TaskStatusFilter>("todas");
 
   const filteredTasks = filterTasks(selectedFilter);
 
   function renderTask({ item }: { item: Task }) {
     return (
-      <View style={styles.taskCard}>
-        <Text style={styles.taskTitle}>
-          {item.title}
-        </Text>
+      <Pressable
+  style={styles.taskCard}
+  accessibilityRole="button"
+  accessibilityLabel={`Abrir detalhes de ${item.title}`}
+  onPress={() =>
+    router.push({
+      pathname: "/tasks/[id]",
+      params: { id: item.id },
+    })
+  }
+>
+        <Text style={styles.taskTitle}>{item.title}</Text>
 
-        <Text style={styles.taskDescription}>
-          {item.description}
+        <Text style={styles.taskDescription}>{item.description}</Text>
+
+        <Text style={styles.taskInfo}>Status: {statusLabels[item.status]}</Text>
+
+        <Text style={styles.taskInfo}>Categoria: {item.category}</Text>
+
+        <Text style={styles.taskInfo}>Prioridade: {item.priority}</Text>
+
+        <Text style={styles.taskInfo}>
+          Criada em: {new Date(item.createdAt).toLocaleDateString("pt-BR")}
         </Text>
 
         <Text style={styles.taskInfo}>
-          Status: {statusLabels[item.status]}
+          Atualizada em: {new Date(item.updatedAt).toLocaleDateString("pt-BR")}
         </Text>
-
-        <Text style={styles.taskInfo}>
-          Categoria: {item.category}
-        </Text>
-
-        <Text style={styles.taskInfo}>
-          Prioridade: {item.priority}
-        </Text>
-
-        <Text style={styles.taskInfo}>
-          Criada em: {new Date(item.createdAt).toLocaleDateString('pt-BR')}
-        </Text>
-
-        <Text style={styles.taskInfo}>
-          Atualizada em: {new Date(item.updatedAt).toLocaleDateString('pt-BR')}
-        </Text>
-      </View>
+      </Pressable>
     );
   }
 
@@ -89,12 +81,28 @@ export default function TaskListScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>
-        Minhas tarefas
-      </Text>
+      <Text style={styles.heading}>Minhas tarefas</Text>
+
+      <Pressable
+        style={{
+            backgroundColor: '#2563EB',
+            padding: 14,
+            borderRadius: 10,
+            alignItems: 'center',
+            marginBottom: 16,
+        }}
+        accessibilityRole="button"
+        onPress={() => router.push('/tasks/new')}
+        >
+         <Text style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
+            + Nova tarefa
+         </Text>
+        </Pressable>
 
       <View style={styles.filterContainer}>
         {filters.map((filter) => (
+
+            
           <Pressable
             key={filter.value}
             accessibilityRole="button"
@@ -105,15 +113,13 @@ export default function TaskListScreen() {
             onPress={() => setSelectedFilter(filter.value)}
             style={[
               styles.filterButton,
-              selectedFilter === filter.value &&
-                styles.filterSelected,
+              selectedFilter === filter.value && styles.filterSelected,
             ]}
           >
             <Text
               style={[
                 styles.filterText,
-                selectedFilter === filter.value &&
-                  styles.filterTextSelected,
+                selectedFilter === filter.value && styles.filterTextSelected,
               ]}
             >
               {filter.label}
@@ -131,9 +137,7 @@ export default function TaskListScreen() {
               void refreshTasks().catch(() => {});
             }}
           >
-            <Text style={styles.retryText}>
-              Tentar novamente
-            </Text>
+            <Text style={styles.retryText}>Tentar novamente</Text>
           </Pressable>
         </View>
       )}
@@ -144,9 +148,7 @@ export default function TaskListScreen() {
         renderItem={renderTask}
         contentContainerStyle={styles.listContent}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            Nenhuma tarefa encontrada.
-          </Text>
+          <Text style={styles.emptyText}>Nenhuma tarefa encontrada.</Text>
         }
       />
     </View>
@@ -157,86 +159,86 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: "#F8FAFC",
   },
   heading: {
     fontSize: 26,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontWeight: "bold",
+    color: "#0F172A",
     marginBottom: 20,
   },
   filterContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
     marginBottom: 16,
   },
   filterButton: {
     paddingVertical: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: "#E2E8F0",
     borderRadius: 20,
   },
   filterSelected: {
-    backgroundColor: '#2563EB',
+    backgroundColor: "#2563EB",
   },
   filterText: {
-    color: '#334155',
+    color: "#334155",
     fontSize: 13,
   },
   filterTextSelected: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   listContent: {
     paddingBottom: 30,
     flexGrow: 1,
   },
   taskCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     padding: 16,
     borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: "#E2E8F0",
   },
   taskTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0F172A',
+    fontWeight: "bold",
+    color: "#0F172A",
     marginBottom: 8,
   },
   taskDescription: {
     fontSize: 14,
-    color: '#475569',
+    color: "#475569",
     marginBottom: 10,
   },
   taskInfo: {
     fontSize: 13,
-    color: '#64748B',
+    color: "#64748B",
     marginTop: 4,
   },
   center: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   errorContainer: {
     padding: 12,
-    backgroundColor: '#FEE2E2',
+    backgroundColor: "#FEE2E2",
     borderRadius: 8,
     marginBottom: 12,
   },
   errorText: {
-    color: '#B91C1C',
+    color: "#B91C1C",
   },
   retryText: {
-    color: '#1D4ED8',
-    fontWeight: 'bold',
+    color: "#1D4ED8",
+    fontWeight: "bold",
     marginTop: 8,
   },
   emptyText: {
-    textAlign: 'center',
-    color: '#64748B',
+    textAlign: "center",
+    color: "#64748B",
     marginTop: 40,
   },
 });

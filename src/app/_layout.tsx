@@ -1,9 +1,4 @@
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-  Slot,
-} from 'expo-router';
+import { DarkTheme, DefaultTheme, Slot, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import {
   ActivityIndicator,
@@ -12,8 +7,6 @@ import {
   View,
 } from "react-native";
 
-import { AnimatedSplashOverlay } from "@/components/animated-icon";
-import AppTabs from "@/components/app-tabs";
 import { AuthProvider } from "@/context/AuthContext";
 import { TaskProvider } from "@/context/TaskContent";
 import { useAuth } from "@/hooks/useAuth";
@@ -36,12 +29,7 @@ function AuthenticatedLayout() {
     return <LoginScreen />;
   }
 
-  return (
-    <>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </>
-  );
+  return <Slot />;
 }
 
 export default function TabLayout() {
