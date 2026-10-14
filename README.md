@@ -81,10 +81,10 @@ Enquanto o usuário não escolhe um tema em Configurações, o app segue o tema 
 
 ## Equipe
 
-| #   | Responsabilidade                              |
-| --- | --------------------------------------------- |
-| 1   | Autenticação e sessão                         |
-| 2   | CRUD de tarefas e persistência                |
-| 3   | Navegação e telas de tarefas                  |
-| 4   | Home, API e componentes reutilizáveis         |
-| 5   | Tema, Configurações, acessibilidade e entrega |
+| #   | Integrante                    | RM     | Responsabilidade                              |
+| --- | ----------------------------- | ------ | --------------------------------------------- |
+| 1   | Leonardo Luiz Jardim Queijo   | 559842 | Autenticação e sessão                         |
+| 2   | Kauan Diogo                   | 560727 | CRUD de tarefas e persistência                |
+| 3   | Enzo Galhardo                 | 561001 | Navegação e telas de tarefas                  |
+| 4   | Kauã Rodrigues de Souza       | 559335 | Home, API e componentes reutilizáveis         |
+| 5   | Felipe Santos Marceli         | 560456 | Tema, Configurações, acessibilidade e entrega |

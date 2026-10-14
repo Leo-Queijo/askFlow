@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -23,19 +22,28 @@ export function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  function handleUsernameChange(text: string) {
+    setUsername(text);
+    setErrorMessage('');
+  }
+
+  function handlePasswordChange(text: string) {
+    setPassword(text);
+    setErrorMessage('');
+  }
 
   async function handleLogin() {
     const normalizedUsername = username.trim();
 
     if (!normalizedUsername || !password) {
-      Alert.alert(
-        'Campos obrigatórios',
-        'Informe seu usuário e sua senha.',
-      );
+      setErrorMessage('Informe seu usuário e sua senha.');
       return;
     }
 
     try {
+      setErrorMessage('');
       setIsSubmitting(true);
 
       await login({
@@ -48,7 +56,7 @@ export function LoginScreen() {
           ? error.message
           : 'Não foi possível realizar o login. Tente novamente.';
 
-      Alert.alert('Falha no login', message);
+      setErrorMessage(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -75,7 +83,7 @@ export function LoginScreen() {
           placeholder="Digite seu usuário"
           placeholderTextColor={colors.secondary}
           value={username}
-          onChangeText={setUsername}
+          onChangeText={handleUsernameChange}
           autoCapitalize="none"
           autoCorrect={false}
           editable={!isSubmitting}
@@ -91,7 +99,7 @@ export function LoginScreen() {
           placeholder="Digite sua senha"
           placeholderTextColor={colors.secondary}
           value={password}
-          onChangeText={setPassword}
+          onChangeText={handlePasswordChange}
           secureTextEntry
           autoCapitalize="none"
           autoCorrect={false}
@@ -103,6 +111,16 @@ export function LoginScreen() {
             void handleLogin();
           }}
         />
+
+        {errorMessage ? (
+          <View
+            style={styles.errorBox}
+            accessibilityRole="alert"
+            accessibilityLiveRegion="polite"
+          >
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          </View>
+        ) : null}
 
         <Pressable
           style={({ pressed }) => [
@@ -191,6 +209,20 @@ function createStyles(colors: ThemeColors) {
       marginBottom: 18,
       color: colors.text,
       backgroundColor: colors.card,
+    },
+    errorBox: {
+      borderWidth: 1,
+      borderColor: colors.error,
+      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      marginBottom: 14,
+    },
+    errorText: {
+      color: colors.error,
+      fontSize: 14,
+      fontWeight: '600',
+      textAlign: 'center',
     },
     button: {
       height: 50,
