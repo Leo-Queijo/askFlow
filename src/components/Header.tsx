@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, Pressable } from "react-native";
+
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+} from "react-native";
 
 interface HeaderProps {
   name: string;
@@ -11,32 +18,71 @@ export default function Header({
   role,
   onLogout,
 }: HeaderProps) {
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
+
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: isDark ? "#070707" : "#FFFFFF",
+        },
+      ]}
+    >
       <View style={styles.userInfo}>
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.role}>{role}</Text>
+        <Text
+          style={[
+            styles.name,
+            { color: isDark ? "#FFFFFF" : "#0F172A" },
+          ]}
+        >
+          {name}
+        </Text>
+
+        <Text
+          style={[
+            styles.role,
+            { color: isDark ? "#B0B4BA" : "#64748B" },
+          ]}
+        >
+          {role}
+        </Text>
       </View>
 
       <Pressable
         onPress={onLogout}
-        style={styles.logoutButton}
+        style={[
+          styles.logoutButton,
+          { backgroundColor: isDark ? "#3F1D22" : "#FEE2E2" },
+        ]}
         accessibilityRole="button"
         accessibilityLabel="Sair da conta"
       >
-        <Text style={styles.logoutText}>Sair</Text>
+        <Text
+          style={[
+            styles.logoutText,
+            { color: isDark ? "#FCA5A5" : "#B91C1C" },
+          ]}
+        >
+          Sair
+        </Text>
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingVertical: 16,
-  },
+  
+container: {
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  paddingVertical: 16,
+  paddingHorizontal: 16,
+  borderRadius: 16,
+},
+
   userInfo: {
     flex: 1,
     marginRight: 12,
@@ -44,21 +90,17 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#0F172A",
   },
   role: {
     fontSize: 14,
-    color: "#64748B",
     marginTop: 4,
   },
   logoutButton: {
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 8,
-    backgroundColor: "#FEE2E2",
   },
   logoutText: {
-    color: "#B91C1C",
     fontWeight: "600",
   },
 });
