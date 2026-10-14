@@ -218,23 +218,17 @@ export function TaskProvider({ children }: TaskProviderProps) {
   );
 
   const filterTasks = useCallback(
-    (filter: TaskStatusFilter): Task[] => {
-      if (filter === "todas") {
-        return tasks;
-      }
+  (filter: TaskStatusFilter): Task[] => {
+    if (filter === 'todas') {
+      return tasks;
+    }
 
-      if (filter === "pendente") {
-        return tasks.filter(
-          (task) =>
-            task.status === "pendente" || task.status === "em_andamento",
-        );
-      }
-
-      return tasks.filter((task) => task.status === filter);
-    },
-    [tasks],
-  );
-
+    return tasks.filter(
+      (task) => task.status === filter
+    );
+  },
+  [tasks]
+);
   const refreshTasks = useCallback(async () => {
     if (!userId) {
       setTasks([]);
