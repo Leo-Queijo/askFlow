@@ -10,9 +10,13 @@ import {
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
+import type { ThemeColors } from '../../types/theme';
 
 export function LogoutButton() {
   const { logout } = useAuth();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   async function handleLogout() {
@@ -48,9 +52,11 @@ export function LogoutButton() {
       disabled={isLoggingOut}
       accessibilityRole="button"
       accessibilityLabel="Sair da conta"
+      accessibilityHint="Encerra a sessão e volta para a tela de login"
+      accessibilityState={{ disabled: isLoggingOut, busy: isLoggingOut }}
     >
       {isLoggingOut ? (
-        <ActivityIndicator color="#FFFFFF" />
+        <ActivityIndicator color={colors.onPrimary} />
       ) : (
         <Text style={styles.buttonText}>Sair da conta</Text>
       )}
@@ -58,25 +64,27 @@ export function LogoutButton() {
   );
 }
 
-const styles = StyleSheet.create({
-  button: {
-    minHeight: 44,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 10,
-    backgroundColor: '#DC2626',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    button: {
+      minHeight: 44,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: 10,
+      backgroundColor: colors.error,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    buttonPressed: {
+      opacity: 0.85,
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: colors.onPrimary,
+      fontSize: 14,
+      fontWeight: '600',
+    },
+  });
+}

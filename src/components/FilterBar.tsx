@@ -1,4 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+
+import { useTheme } from "@/hooks/useTheme";
+import type { ThemeColors } from "@/types/theme";
 import type { TaskStatusFilter } from "../types/task";
 
 interface FilterBarProps {
@@ -17,6 +20,9 @@ export default function FilterBar({
   selectedFilter,
   onSelectFilter,
 }: FilterBarProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       {filters.map((filter) => {
@@ -30,6 +36,10 @@ export default function FilterBar({
               isSelected && styles.selectedFilter,
             ]}
             onPress={() => onSelectFilter(filter.value)}
+            accessibilityRole="button"
+            accessibilityLabel={`Filtrar: ${filter.label}`}
+            accessibilityHint="Mostra apenas as tarefas deste status"
+            accessibilityState={{ selected: isSelected }}
           >
             <Text
               style={[
@@ -46,27 +56,29 @@ export default function FilterBar({
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  filter: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 20,
-    backgroundColor: "#E2E8F0",
-  },
-  selectedFilter: {
-    backgroundColor: "#2563EB",
-  },
-  label: {
-    fontSize: 13,
-    color: "#334155",
-    fontWeight: "500",
-  },
-  selectedLabel: {
-    color: "#FFFFFF",
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+    },
+    filter: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      borderRadius: 20,
+      backgroundColor: colors.muted,
+    },
+    selectedFilter: {
+      backgroundColor: colors.primary,
+    },
+    label: {
+      fontSize: 13,
+      color: colors.text,
+      fontWeight: "500",
+    },
+    selectedLabel: {
+      color: colors.onPrimary,
+    },
+  });
+}

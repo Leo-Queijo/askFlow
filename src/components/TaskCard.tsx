@@ -1,5 +1,8 @@
 import { StyleSheet, Text, View } from "react-native";
-import type { Task } from "../types/task";
+
+import { useTheme } from "@/hooks/useTheme";
+import type { ThemeColors } from "@/types/theme";
+import type { Task, TaskPriority } from "../types/task";
 import StatusBadge from "./StatusBadge";
 
 interface TaskCardProps {
@@ -12,13 +15,16 @@ const priorityLabels = {
   alta: "Alta",
 };
 
-const priorityColors = {
-  baixa: "#16A34A",
-  media: "#D97706",
-  alta: "#DC2626",
+const priorityColorKeys: Record<TaskPriority, keyof ThemeColors> = {
+  baixa: "success",
+  media: "warning",
+  alta: "error",
 };
 
 export default function TaskCard({ task }: TaskCardProps) {
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -38,7 +44,7 @@ export default function TaskCard({ task }: TaskCardProps) {
         <Text
           style={[
             styles.priority,
-            { color: priorityColors[task.priority] },
+            { color: colors[priorityColorKeys[task.priority]] },
           ]}
         >
           Prioridade: {priorityLabels[task.priority]}
@@ -48,40 +54,42 @@ export default function TaskCard({ task }: TaskCardProps) {
   );
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    marginBottom: 12,
-  },
-  header: {
-    gap: 10,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 17,
-    fontWeight: "bold",
-    color: "#0F172A",
-  },
-  description: {
-    fontSize: 14,
-    color: "#64748B",
-    lineHeight: 20,
-    marginBottom: 14,
-  },
-  footer: {
-    gap: 6,
-  },
-  category: {
-    fontSize: 12,
-    color: "#475569",
-    textTransform: "capitalize",
-  },
-  priority: {
-    fontSize: 12,
-    fontWeight: "600",
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    card: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      marginBottom: 12,
+    },
+    header: {
+      gap: 10,
+      marginBottom: 10,
+    },
+    title: {
+      fontSize: 17,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    description: {
+      fontSize: 14,
+      color: colors.secondary,
+      lineHeight: 20,
+      marginBottom: 14,
+    },
+    footer: {
+      gap: 6,
+    },
+    category: {
+      fontSize: 12,
+      color: colors.secondary,
+      textTransform: "capitalize",
+    },
+    priority: {
+      fontSize: 12,
+      fontWeight: "600",
+    },
+  });
+}

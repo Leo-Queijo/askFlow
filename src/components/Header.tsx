@@ -1,11 +1,7 @@
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  useColorScheme,
-} from "react-native";
+import { useTheme } from "@/hooks/useTheme";
+import type { ThemeColors } from "@/types/theme";
 
 interface HeaderProps {
   name: string;
@@ -18,89 +14,71 @@ export default function Header({
   role,
   onLogout,
 }: HeaderProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: isDark ? "#070707" : "#FFFFFF",
-        },
-      ]}
-    >
+    <View style={styles.container}>
       <View style={styles.userInfo}>
-        <Text
-          style={[
-            styles.name,
-            { color: isDark ? "#FFFFFF" : "#0F172A" },
-          ]}
-        >
-          {name}
-        </Text>
-
-        <Text
-          style={[
-            styles.role,
-            { color: isDark ? "#B0B4BA" : "#64748B" },
-          ]}
-        >
-          {role}
-        </Text>
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.role}>{role}</Text>
       </View>
 
       <Pressable
         onPress={onLogout}
-        style={[
+        style={({ pressed }) => [
           styles.logoutButton,
-          { backgroundColor: isDark ? "#3F1D22" : "#FEE2E2" },
+          pressed && styles.pressed,
         ]}
         accessibilityRole="button"
         accessibilityLabel="Sair da conta"
+        accessibilityHint="Encerra a sessão e volta para a tela de login"
       >
-        <Text
-          style={[
-            styles.logoutText,
-            { color: isDark ? "#FCA5A5" : "#B91C1C" },
-          ]}
-        >
-          Sair
-        </Text>
+        <Text style={styles.logoutText}>Sair</Text>
       </Pressable>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  
-container: {
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "space-between",
-  paddingVertical: 16,
-  paddingHorizontal: 16,
-  borderRadius: 16,
-},
-
-  userInfo: {
-    flex: 1,
-    marginRight: 12,
-  },
-  name: {
-    fontSize: 22,
-    fontWeight: "bold",
-  },
-  role: {
-    fontSize: 14,
-    marginTop: 4,
-  },
-  logoutButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-  },
-  logoutText: {
-    fontWeight: "600",
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingVertical: 16,
+      paddingHorizontal: 16,
+      borderRadius: 16,
+      backgroundColor: colors.card,
+    },
+    userInfo: {
+      flex: 1,
+      marginRight: 12,
+    },
+    name: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    role: {
+      fontSize: 14,
+      marginTop: 4,
+      color: colors.secondary,
+    },
+    logoutButton: {
+      minHeight: 44,
+      justifyContent: "center",
+      paddingHorizontal: 14,
+      borderRadius: 8,
+      borderWidth: 1,
+      borderColor: colors.error,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    logoutText: {
+      fontWeight: "600",
+      color: colors.error,
+    },
+  });
+}

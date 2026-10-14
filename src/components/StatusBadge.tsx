@@ -1,4 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
+
+import { useTheme } from "@/hooks/useTheme";
+import type { ThemeColors } from "@/types/theme";
 import type { TaskStatus } from "../types/task";
 
 interface StatusBadgeProps {
@@ -11,35 +14,23 @@ const statusLabels: Record<TaskStatus, string> = {
   concluida: "Concluída",
 };
 
-const statusColors: Record<
-  TaskStatus,
-  { background: string; text: string }
-> = {
-  pendente: {
-    background: "#FEF3C7",
-    text: "#92400E",
-  },
-  em_andamento: {
-    background: "#DBEAFE",
-    text: "#1D4ED8",
-  },
-  concluida: {
-    background: "#DCFCE7",
-    text: "#166534",
-  },
+const statusColorKeys: Record<TaskStatus, keyof ThemeColors> = {
+  pendente: "warning",
+  em_andamento: "primary",
+  concluida: "success",
 };
 
 export default function StatusBadge({ status }: StatusBadgeProps) {
-  const colors = statusColors[status];
+  const { colors } = useTheme();
+  const color = colors[statusColorKeys[status]];
 
   return (
     <View
-      style={[
-        styles.badge,
-        { backgroundColor: colors.background },
-      ]}
+      style={[styles.badge, { borderColor: color }]}
+      accessible
+      accessibilityLabel={`Status: ${statusLabels[status]}`}
     >
-      <Text style={[styles.label, { color: colors.text }]}>
+      <Text style={[styles.label, { color }]}>
         {statusLabels[status]}
       </Text>
     </View>
@@ -49,9 +40,10 @@ export default function StatusBadge({ status }: StatusBadgeProps) {
 const styles = StyleSheet.create({
   badge: {
     alignSelf: "flex-start",
-    paddingVertical: 5,
+    paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 20,
+    borderWidth: 1,
   },
   label: {
     fontSize: 12,

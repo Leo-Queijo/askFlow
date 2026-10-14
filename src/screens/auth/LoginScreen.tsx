@@ -12,9 +12,13 @@ import {
 } from 'react-native';
 
 import { useAuth } from '../../hooks/useAuth';
+import { useTheme } from '../../hooks/useTheme';
+import type { ThemeColors } from '../../types/theme';
 
 export function LoginScreen() {
   const { login } = useAuth();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -56,7 +60,9 @@ export function LoginScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.card}>
-        <Text style={styles.title}>askFlow</Text>
+        <Text style={styles.title} accessibilityRole="header">
+          askFlow
+        </Text>
 
         <Text style={styles.subtitle}>
           Organize suas tarefas com facilidade
@@ -67,13 +73,14 @@ export function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Digite seu usuário"
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={colors.secondary}
           value={username}
           onChangeText={setUsername}
           autoCapitalize="none"
           autoCorrect={false}
           editable={!isSubmitting}
           accessibilityLabel="Usuário"
+          accessibilityHint="Digite o nome de usuário para entrar"
           returnKeyType="next"
         />
 
@@ -82,7 +89,7 @@ export function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Digite sua senha"
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={colors.secondary}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -90,6 +97,7 @@ export function LoginScreen() {
           autoCorrect={false}
           editable={!isSubmitting}
           accessibilityLabel="Senha"
+          accessibilityHint="Digite sua senha para entrar"
           returnKeyType="done"
           onSubmitEditing={() => {
             void handleLogin();
@@ -108,9 +116,11 @@ export function LoginScreen() {
           disabled={isSubmitting}
           accessibilityRole="button"
           accessibilityLabel="Entrar na aplicação"
+          accessibilityHint="Valida usuário e senha e abre o aplicativo"
+          accessibilityState={{ disabled: isSubmitting, busy: isSubmitting }}
         >
           {isSubmitting ? (
-            <ActivityIndicator color="#FFFFFF" />
+            <ActivityIndicator color={colors.onPrimary} />
           ) : (
             <Text style={styles.buttonText}>Entrar</Text>
           )}
@@ -130,85 +140,89 @@ export function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F1F5F9',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
-    elevation: 4,
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      padding: 24,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#2563EB',
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#64748B',
-    textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 28,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 8,
-  },
-  input: {
-    height: 48,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 18,
-    color: '#0F172A',
-    backgroundColor: '#FFFFFF',
-  },
-  button: {
-    height: 50,
-    backgroundColor: '#2563EB',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  hint: {
-    marginTop: 20,
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#64748B',
-    fontWeight: '600',
-  },
-  credentials: {
-    marginTop: 5,
-    fontSize: 12,
-    textAlign: 'center',
-    color: '#64748B',
-  },
-});
+    card: {
+      backgroundColor: colors.card,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: 24,
+      elevation: 4,
+      shadowColor: '#000000',
+      shadowOffset: {
+        width: 0,
+        height: 3,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+    },
+    title: {
+      fontSize: 32,
+      fontWeight: 'bold',
+      color: colors.primary,
+      textAlign: 'center',
+    },
+    subtitle: {
+      fontSize: 14,
+      color: colors.secondary,
+      textAlign: 'center',
+      marginTop: 8,
+      marginBottom: 28,
+    },
+    label: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+      marginBottom: 8,
+    },
+    input: {
+      height: 48,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 12,
+      marginBottom: 18,
+      color: colors.text,
+      backgroundColor: colors.card,
+    },
+    button: {
+      height: 50,
+      backgroundColor: colors.primary,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 4,
+    },
+    buttonPressed: {
+      opacity: 0.85,
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: colors.onPrimary,
+      fontSize: 16,
+      fontWeight: 'bold',
+    },
+    hint: {
+      marginTop: 20,
+      fontSize: 12,
+      textAlign: 'center',
+      color: colors.secondary,
+      fontWeight: '600',
+    },
+    credentials: {
+      marginTop: 5,
+      fontSize: 12,
+      textAlign: 'center',
+      color: colors.secondary,
+    },
+  });
+}

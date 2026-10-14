@@ -12,12 +12,14 @@ import {
 } from "react-native";
 
 import { useTasks } from "@/hooks/useTasks";
+import { useTheme } from "@/hooks/useTheme";
 import type {
     TaskCategory,
     TaskInput,
     TaskPriority,
     TaskStatus,
 } from "@/types/task";
+import type { ThemeColors } from "@/types/theme";
 
 const statuses: TaskStatus[] = ["pendente", "em_andamento", "concluida"];
 
@@ -34,6 +36,8 @@ const categories: TaskCategory[] = [
 export default function TaskFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const { addTask, updateTask, getTaskById, loading } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const existingTask = id ? getTaskById(id) : undefined;
   const isEditing = Boolean(id);
@@ -107,28 +111,34 @@ export default function TaskFormScreen() {
     return (
       <View style={styles.field}>
         <Text style={styles.label}>{label}</Text>
-        <View style={styles.options}>
-          {options.map((option) => (
-            <Pressable
-              key={option}
-              accessibilityRole="button"
-              accessibilityState={{ selected: selected === option }}
-              onPress={() => onChange(option)}
-              style={[
-                styles.option,
-                selected === option && styles.selectedOption,
-              ]}
-            >
-              <Text
+        <View style={styles.options} accessibilityRole="radiogroup">
+          {options.map((option) => {
+            const optionLabel = option.replace(/_/g, " ");
+
+            return (
+              <Pressable
+                key={option}
+                accessibilityRole="radio"
+                accessibilityLabel={`${label}: ${optionLabel}`}
+                accessibilityHint={`Define ${label.toLowerCase()} da tarefa`}
+                accessibilityState={{ checked: selected === option }}
+                onPress={() => onChange(option)}
                 style={[
-                  styles.optionText,
-                  selected === option && styles.selectedText,
+                  styles.option,
+                  selected === option && styles.selectedOption,
                 ]}
               >
-                {option.replace(/_/g, " ")}
-              </Text>
-            </Pressable>
-          ))}
+                <Text
+                  style={[
+                    styles.optionText,
+                    selected === option && styles.selectedText,
+                  ]}
+                >
+                  {optionLabel}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       </View>
     );
@@ -137,7 +147,7 @@ export default function TaskFormScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -145,8 +155,13 @@ export default function TaskFormScreen() {
   if (isEditing && !existingTask) {
     return (
       <View style={styles.center}>
-        <Text>Tarefa não encontrada.</Text>
-        <Pressable onPress={() => router.back()}>
+        <Text style={styles.label}>Tarefa não encontrada.</Text>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
+          accessibilityHint="Volta para a tela anterior"
+        >
           <Text style={styles.backText}>Voltar</Text>
         </Pressable>
       </View>
@@ -155,7 +170,7 @@ export default function TaskFormScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.heading}>
+      <Text style={styles.heading} accessibilityRole="header">
         {isEditing ? "Editar tarefa" : "Nova tarefa"}
       </Text>
 
@@ -165,7 +180,9 @@ export default function TaskFormScreen() {
         value={title}
         onChangeText={setTitle}
         placeholder="Digite o título"
+        placeholderTextColor={colors.secondary}
         accessibilityLabel="Título da tarefa"
+        accessibilityHint="Obrigatório, com pelo menos 3 caracteres"
         maxLength={100}
       />
 
@@ -175,7 +192,9 @@ export default function TaskFormScreen() {
         value={description}
         onChangeText={setDescription}
         placeholder="Descreva a tarefa"
+        placeholderTextColor={colors.secondary}
         accessibilityLabel="Descrição da tarefa"
+        accessibilityHint="Obrigatória, com pelo menos 5 caracteres"
         multiline
         numberOfLines={4}
         textAlignVertical="top"
@@ -185,16 +204,27 @@ export default function TaskFormScreen() {
       {renderOptions("Prioridade", priorities, priority, setPriority)}
       {renderOptions("Categoria", categories, category, setCategory)}
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text style={styles.error} accessibilityRole="alert">
+          {error}
+        </Text>
+      ) : null}
 
       <Pressable
         style={[styles.saveButton, saving && styles.disabled]}
         disabled={saving}
         accessibilityRole="button"
+        accessibilityLabel={isEditing ? "Salvar alterações" : "Cadastrar tarefa"}
+        accessibilityHint={
+          isEditing
+            ? "Salva as alterações e volta para a tela anterior"
+            : "Cria a tarefa e volta para a lista"
+        }
+        accessibilityState={{ disabled: saving, busy: saving }}
         onPress={() => void handleSave()}
       >
         {saving ? (
-          <ActivityIndicator color="#FFFFFF" />
+          <ActivityIndicator color={colors.onPrimary} />
         ) : (
           <Text style={styles.saveText}>
             {isEditing ? "Salvar alterações" : "Cadastrar tarefa"}
@@ -205,52 +235,59 @@ export default function TaskFormScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#F8FAFC" },
-  content: { padding: 20, paddingBottom: 60 },
-  heading: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#0F172A",
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#334155",
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 10,
-    padding: 14,
-    fontSize: 16,
-    color: "#0F172A",
-    marginBottom: 20,
-  },
-  textArea: { minHeight: 110 },
-  field: { marginBottom: 22 },
-  options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  option: {
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    backgroundColor: "#E2E8F0",
-    borderRadius: 8,
-  },
-  selectedOption: { backgroundColor: "#2563EB" },
-  optionText: { color: "#334155", textTransform: "capitalize" },
-  selectedText: { color: "#FFFFFF", fontWeight: "600" },
-  error: { color: "#DC2626", marginBottom: 16 },
-  saveButton: {
-    backgroundColor: "#2563EB",
-    padding: 16,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  saveText: { color: "#FFFFFF", fontWeight: "bold", fontSize: 16 },
-  disabled: { opacity: 0.6 },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  backText: { color: "#2563EB", marginTop: 16 },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    content: { padding: 20, paddingBottom: 60 },
+    heading: {
+      fontSize: 26,
+      fontWeight: "bold",
+      color: colors.text,
+      marginBottom: 24,
+    },
+    label: {
+      fontSize: 15,
+      fontWeight: "600",
+      color: colors.text,
+      marginBottom: 8,
+    },
+    input: {
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      padding: 14,
+      fontSize: 16,
+      color: colors.text,
+      marginBottom: 20,
+    },
+    textArea: { minHeight: 110 },
+    field: { marginBottom: 22 },
+    options: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+    option: {
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+      backgroundColor: colors.muted,
+      borderRadius: 8,
+    },
+    selectedOption: { backgroundColor: colors.primary },
+    optionText: { color: colors.text, textTransform: "capitalize" },
+    selectedText: { color: colors.onPrimary, fontWeight: "600" },
+    error: { color: colors.error, marginBottom: 16 },
+    saveButton: {
+      backgroundColor: colors.primary,
+      padding: 16,
+      borderRadius: 10,
+      alignItems: "center",
+    },
+    saveText: { color: colors.onPrimary, fontWeight: "bold", fontSize: 16 },
+    disabled: { opacity: 0.6 },
+    center: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.background,
+    },
+    backText: { color: colors.primary, marginTop: 16, padding: 8 },
+  });
+}

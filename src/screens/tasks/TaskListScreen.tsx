@@ -8,9 +8,12 @@ import {
     Text,
     View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useTasks } from "@/hooks/useTasks";
+import { useTheme } from "@/hooks/useTheme";
 import type { Task, TaskStatusFilter } from "@/types/task";
+import type { ThemeColors } from "@/types/theme";
 
 const filters: {
   label: string;
@@ -30,6 +33,9 @@ const statusLabels = {
 
 export default function TaskListScreen() {
   const { loading, error, filterTasks, refreshTasks } = useTasks();
+  const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const styles = createStyles(colors);
 
   const [selectedFilter, setSelectedFilter] =
     useState<TaskStatusFilter>("todas");
@@ -39,16 +45,17 @@ export default function TaskListScreen() {
   function renderTask({ item }: { item: Task }) {
     return (
       <Pressable
-  style={styles.taskCard}
-  accessibilityRole="button"
-  accessibilityLabel={`Abrir detalhes de ${item.title}`}
-  onPress={() =>
-    router.push({
-      pathname: "/tasks/[id]",
-      params: { id: item.id },
-    })
-  }
->
+        style={({ pressed }) => [styles.taskCard, pressed && styles.pressed]}
+        accessibilityRole="button"
+        accessibilityLabel={`Abrir detalhes de ${item.title}`}
+        accessibilityHint="Mostra todos os dados da tarefa, com opções de editar e excluir"
+        onPress={() =>
+          router.push({
+            pathname: "/tasks/[id]",
+            params: { id: item.id },
+          })
+        }
+      >
         <Text style={styles.taskTitle}>{item.title}</Text>
 
         <Text style={styles.taskDescription}>{item.description}</Text>
@@ -73,40 +80,35 @@ export default function TaskListScreen() {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2563EB" />
-        <Text>Carregando tarefas...</Text>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.taskInfo}>Carregando tarefas...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Minhas tarefas</Text>
+    <View style={[styles.container, { paddingTop: insets.top + 16 }]}>
+      <Text style={styles.heading} accessibilityRole="header">
+        Minhas tarefas
+      </Text>
 
       <Pressable
-        style={{
-            backgroundColor: '#2563EB',
-            padding: 14,
-            borderRadius: 10,
-            alignItems: 'center',
-            marginBottom: 16,
-        }}
+        style={({ pressed }) => [styles.newButton, pressed && styles.pressed]}
         accessibilityRole="button"
+        accessibilityLabel="Nova tarefa"
+        accessibilityHint="Abre o formulário para cadastrar uma tarefa"
         onPress={() => router.push('/tasks/new')}
-        >
-         <Text style={{ color: '#FFFFFF', fontWeight: 'bold' }}>
-            + Nova tarefa
-         </Text>
-        </Pressable>
+      >
+        <Text style={styles.newButtonText}>+ Nova tarefa</Text>
+      </Pressable>
 
       <View style={styles.filterContainer}>
         {filters.map((filter) => (
-
-            
           <Pressable
             key={filter.value}
             accessibilityRole="button"
             accessibilityLabel={`Filtrar: ${filter.label}`}
+            accessibilityHint="Mostra apenas as tarefas deste status"
             accessibilityState={{
               selected: selectedFilter === filter.value,
             }}
@@ -129,10 +131,12 @@ export default function TaskListScreen() {
       </View>
 
       {error && (
-        <View style={styles.errorContainer}>
+        <View style={styles.errorContainer} accessibilityRole="alert">
           <Text style={styles.errorText}>{error}</Text>
           <Pressable
             accessibilityRole="button"
+            accessibilityLabel="Tentar novamente"
+            accessibilityHint="Recarrega a lista de tarefas"
             onPress={() => {
               void refreshTasks().catch(() => {});
             }}
@@ -155,90 +159,109 @@ export default function TaskListScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#F8FAFC",
-  },
-  heading: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#0F172A",
-    marginBottom: 20,
-  },
-  filterContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 16,
-  },
-  filterButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: "#E2E8F0",
-    borderRadius: 20,
-  },
-  filterSelected: {
-    backgroundColor: "#2563EB",
-  },
-  filterText: {
-    color: "#334155",
-    fontSize: 13,
-  },
-  filterTextSelected: {
-    color: "#FFFFFF",
-  },
-  listContent: {
-    paddingBottom: 30,
-    flexGrow: 1,
-  },
-  taskCard: {
-    backgroundColor: "#FFFFFF",
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  taskTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#0F172A",
-    marginBottom: 8,
-  },
-  taskDescription: {
-    fontSize: 14,
-    color: "#475569",
-    marginBottom: 10,
-  },
-  taskInfo: {
-    fontSize: 13,
-    color: "#64748B",
-    marginTop: 4,
-  },
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  errorContainer: {
-    padding: 12,
-    backgroundColor: "#FEE2E2",
-    borderRadius: 8,
-    marginBottom: 12,
-  },
-  errorText: {
-    color: "#B91C1C",
-  },
-  retryText: {
-    color: "#1D4ED8",
-    fontWeight: "bold",
-    marginTop: 8,
-  },
-  emptyText: {
-    textAlign: "center",
-    color: "#64748B",
-    marginTop: 40,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: colors.background,
+    },
+    heading: {
+      fontSize: 26,
+      fontWeight: "bold",
+      color: colors.text,
+      marginBottom: 20,
+    },
+    newButton: {
+      backgroundColor: colors.primary,
+      padding: 14,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    newButtonText: {
+      color: colors.onPrimary,
+      fontWeight: 'bold',
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    filterContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 8,
+      marginBottom: 16,
+    },
+    filterButton: {
+      paddingVertical: 8,
+      paddingHorizontal: 12,
+      backgroundColor: colors.muted,
+      borderRadius: 20,
+    },
+    filterSelected: {
+      backgroundColor: colors.primary,
+    },
+    filterText: {
+      color: colors.text,
+      fontSize: 13,
+    },
+    filterTextSelected: {
+      color: colors.onPrimary,
+    },
+    listContent: {
+      paddingBottom: 30,
+      flexGrow: 1,
+    },
+    taskCard: {
+      backgroundColor: colors.card,
+      padding: 16,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    taskTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: colors.text,
+      marginBottom: 8,
+    },
+    taskDescription: {
+      fontSize: 14,
+      color: colors.secondary,
+      marginBottom: 10,
+    },
+    taskInfo: {
+      fontSize: 13,
+      color: colors.secondary,
+      marginTop: 4,
+    },
+    center: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: colors.background,
+    },
+    errorContainer: {
+      padding: 12,
+      backgroundColor: colors.card,
+      borderWidth: 1,
+      borderColor: colors.error,
+      borderRadius: 8,
+      marginBottom: 12,
+    },
+    errorText: {
+      color: colors.error,
+    },
+    retryText: {
+      color: colors.primary,
+      fontWeight: "bold",
+      marginTop: 8,
+    },
+    emptyText: {
+      textAlign: "center",
+      color: colors.secondary,
+      marginTop: 40,
+    },
+  });
+}

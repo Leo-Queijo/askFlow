@@ -3,7 +3,9 @@ import CustomButton from "@/components/CustomButton";
 import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useTasks } from "@/hooks/useTasks";
+import { useTheme } from "@/hooks/useTheme";
 import { getRandomQuote, type Quote } from "@/services/api";
+import type { ThemeColors } from "@/types/theme";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -11,6 +13,8 @@ import { StyleSheet, Text, View } from "react-native";
 export default function HomePage() {
   const { user, logout } = useAuth();
   const { tasks, loading } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   const [quote, setQuote] = useState<Quote | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(true);
@@ -48,7 +52,9 @@ export default function HomePage() {
         }}
       />
 
-      <Text style={styles.title}>askFlow</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        askFlow
+      </Text>
 
       <Text style={styles.subtitle}>
         Olá, {user?.name ?? "usuário"}!
@@ -59,7 +65,9 @@ export default function HomePage() {
       </Text>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Resumo das tarefas</Text>
+        <Text style={styles.cardTitle} accessibilityRole="header">
+          Resumo das tarefas
+        </Text>
 
         {loading ? (
           <Text style={styles.text}>Carregando tarefas...</Text>
@@ -77,15 +85,20 @@ export default function HomePage() {
       </View>
 
       <View style={styles.quoteCard}>
-        <Text style={styles.cardTitle}>Frase motivacional</Text>
+        <Text style={styles.cardTitle} accessibilityRole="header">
+          Frase motivacional
+        </Text>
 
         {quoteLoading ? (
           <Text style={styles.text}>Carregando frase...</Text>
         ) : quoteError ? (
           <>
-            <Text style={styles.error}>{quoteError}</Text>
+            <Text style={styles.error} accessibilityRole="alert">
+              {quoteError}
+            </Text>
             <CustomButton
               title="Tentar novamente"
+              accessibilityHint="Tenta carregar a frase motivacional de novo"
               onPress={() => {
                 void loadQuote();
               }}
@@ -99,6 +112,7 @@ export default function HomePage() {
             <Text style={styles.author}>— {quote.author}</Text>
             <CustomButton
               title="Nova frase"
+              accessibilityHint="Carrega outra frase motivacional"
               onPress={() => {
                 void loadQuote();
               }}
@@ -109,71 +123,74 @@ export default function HomePage() {
 
       <CustomButton
         title="Ver minhas tarefas"
+        accessibilityHint="Abre a lista das suas tarefas"
         onPress={() => router.push("/(tabs)/tasks")}
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
     container: {
-    flex: 1,
-    padding: 24,
-    paddingTop: 10,
-    justifyContent: "flex-start",
-    backgroundColor: "#F8FAFC",
+      flex: 1,
+      padding: 24,
+      paddingTop: 10,
+      justifyContent: "flex-start",
+      backgroundColor: colors.background,
     },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#0F172A",
-    marginBottom: 16,
-  },
-  subtitle: {
-    fontSize: 22,
-    fontWeight: "600",
-    color: "#0F172A",
-    marginBottom: 8,
-  },
-  text: {
-    fontSize: 16,
-    color: "#475569",
-    marginBottom: 8,
-  },
-  card: {
-    marginTop: 24,
-    padding: 20,
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
-  },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#0F172A",
-    marginBottom: 12,
-  },
-  quoteCard: {
-    marginTop: 16,
-    padding: 20,
-    borderRadius: 12,
-    backgroundColor: "#FFFFFF",
-  },
-  quoteText: {
-    fontSize: 16,
-    fontStyle: "italic",
-    color: "#334155",
-    marginBottom: 12,
-  },
-  author: {
-    fontSize: 14,
-    color: "#64748B",
-    textAlign: "right",
-    marginBottom: 16,
-  },
-  error: {
-    fontSize: 14,
-    color: "#DC2626",
-    marginBottom: 12,
-  },
-});
+    title: {
+      fontSize: 28,
+      fontWeight: "bold",
+      color: colors.text,
+      marginBottom: 16,
+    },
+    subtitle: {
+      fontSize: 22,
+      fontWeight: "600",
+      color: colors.text,
+      marginBottom: 8,
+    },
+    text: {
+      fontSize: 16,
+      color: colors.secondary,
+      marginBottom: 8,
+    },
+    card: {
+      marginTop: 24,
+      padding: 20,
+      borderRadius: 12,
+      backgroundColor: colors.card,
+    },
+    cardTitle: {
+      fontSize: 18,
+      fontWeight: "bold",
+      color: colors.text,
+      marginBottom: 12,
+    },
+    quoteCard: {
+      marginTop: 16,
+      marginBottom: 16,
+      padding: 20,
+      borderRadius: 12,
+      backgroundColor: colors.card,
+    },
+    quoteText: {
+      fontSize: 16,
+      fontStyle: "italic",
+      color: colors.text,
+      marginBottom: 12,
+    },
+    author: {
+      fontSize: 14,
+      color: colors.secondary,
+      textAlign: "right",
+      marginBottom: 16,
+    },
+    error: {
+      fontSize: 14,
+      color: colors.error,
+      marginBottom: 12,
+    },
+  });
+}

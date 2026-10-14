@@ -1,15 +1,19 @@
 import { Tabs } from "expo-router";
 
+import { useTheme } from "@/hooks/useTheme";
+
 export default function TabsLayout() {
-  console.log("ASKFLOW: TabsLayout foi carregado");
+  const { colors } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: "#2563EB",
-        tabBarInactiveTintColor: "#64748B",
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.secondary,
         tabBarStyle: {
-          backgroundColor: "#FFFFFF",
+          backgroundColor: colors.card,
+          borderTopColor: colors.border,
         },
       }}
     >
@@ -17,6 +21,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Home",
+          tabBarAccessibilityLabel: "Home",
         }}
       />
 
@@ -24,6 +29,7 @@ export default function TabsLayout() {
         name="tasks"
         options={{
           title: "Tarefas",
+          tabBarAccessibilityLabel: "Tarefas",
         }}
       />
 
@@ -31,6 +37,7 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: "Configurações",
+          tabBarAccessibilityLabel: "Configurações",
         }}
       />
     </Tabs>

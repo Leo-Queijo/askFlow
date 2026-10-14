@@ -12,10 +12,14 @@ import {
 } from 'react-native';
 
 import { useTasks } from '@/hooks/useTasks';
+import { useTheme } from '@/hooks/useTheme';
+import type { ThemeColors } from '@/types/theme';
 
 export default function TaskDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getTaskById, deleteTask } = useTasks();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState('');
 
@@ -37,7 +41,7 @@ export default function TaskDetailScreen() {
     }
   }
 
-  
+
 function handleDelete() {
   const message = 'Tem certeza que deseja excluir esta tarefa?';
 
@@ -68,8 +72,13 @@ function handleDelete() {
   if (!task) {
     return (
       <View style={styles.center}>
-        <Text>Tarefa não encontrada.</Text>
-        <Pressable onPress={() => router.back()}>
+        <Text style={styles.info}>Tarefa não encontrada.</Text>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
+          accessibilityHint="Volta para a tela anterior"
+        >
           <Text style={styles.link}>Voltar</Text>
         </Pressable>
       </View>
@@ -78,7 +87,9 @@ function handleDelete() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{task.title}</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        {task.title}
+      </Text>
       <Text style={styles.description}>{task.description}</Text>
 
       <Text style={styles.info}>Status: {task.status}</Text>
@@ -91,11 +102,17 @@ function handleDelete() {
         Atualizada em: {new Date(task.updatedAt).toLocaleDateString('pt-BR')}
       </Text>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {error ? (
+        <Text style={styles.error} accessibilityRole="alert">
+          {error}
+        </Text>
+      ) : null}
 
       <Pressable
-        style={styles.editButton}
+        style={({ pressed }) => [styles.editButton, pressed && styles.pressed]}
         accessibilityRole="button"
+        accessibilityLabel={`Editar tarefa ${task.title}`}
+        accessibilityHint="Abre o formulário para alterar esta tarefa"
         onPress={() =>
           router.push({
             pathname: '/tasks/edit',
@@ -107,13 +124,20 @@ function handleDelete() {
       </Pressable>
 
       <Pressable
-        style={styles.deleteButton}
+        style={({ pressed }) => [
+          styles.deleteButton,
+          pressed && styles.pressed,
+          deleting && styles.disabled,
+        ]}
         accessibilityRole="button"
+        accessibilityLabel={`Excluir tarefa ${task.title}`}
+        accessibilityHint="Pede confirmação e remove esta tarefa permanentemente"
+        accessibilityState={{ disabled: deleting, busy: deleting }}
         disabled={deleting}
         onPress={handleDelete}
       >
         {deleting ? (
-          <ActivityIndicator color="#FFFFFF" />
+          <ActivityIndicator color={colors.onPrimary} />
         ) : (
           <Text style={styles.buttonText}>Excluir tarefa</Text>
         )}
@@ -122,57 +146,67 @@ function handleDelete() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#F8FAFC',
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#0F172A',
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 16,
-    color: '#475569',
-    marginBottom: 20,
-  },
-  info: {
-    fontSize: 15,
-    color: '#334155',
-    marginBottom: 10,
-  },
-  editButton: {
-    backgroundColor: '#2563EB',
-    padding: 16,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  deleteButton: {
-    backgroundColor: '#DC2626',
-    padding: 16,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  buttonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-  },
-  error: {
-    color: '#DC2626',
-    marginTop: 12,
-  },
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  link: {
-    color: '#2563EB',
-    marginTop: 16,
-  },
-});
+function createStyles(colors: ThemeColors) {
+  return StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 20,
+      backgroundColor: colors.background,
+    },
+    title: {
+      fontSize: 26,
+      fontWeight: 'bold',
+      color: colors.text,
+      marginBottom: 12,
+    },
+    description: {
+      fontSize: 16,
+      color: colors.secondary,
+      marginBottom: 20,
+    },
+    info: {
+      fontSize: 15,
+      color: colors.text,
+      marginBottom: 10,
+    },
+    editButton: {
+      backgroundColor: colors.primary,
+      padding: 16,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginTop: 20,
+    },
+    deleteButton: {
+      backgroundColor: colors.error,
+      padding: 16,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginTop: 12,
+    },
+    pressed: {
+      opacity: 0.85,
+    },
+    disabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: colors.onPrimary,
+      fontWeight: 'bold',
+    },
+    error: {
+      color: colors.error,
+      marginTop: 12,
+    },
+    center: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+    },
+    link: {
+      color: colors.primary,
+      marginTop: 16,
+      padding: 8,
+    },
+  });
+}
