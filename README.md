@@ -1,56 +1,90 @@
-# Welcome to your Expo app 👋
+# askFlow
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Aplicativo mobile de gerenciamento de tarefas, feito com **Expo (SDK 57)**, **React Native**, **TypeScript** e **Expo Router**. Cada usuário faz login e gerencia apenas as próprias tarefas. Os dados ficam salvos no dispositivo com **AsyncStorage**.
 
-## Get started
+## Funcionalidades
 
-1. Install dependencies
+- Login com sessão persistida e logout
+- CRUD de tarefas (criar, listar, ver detalhes, editar, excluir) separado por usuário
+- Filtro de tarefas por status
+- Home com resumo das tarefas e frase motivacional vinda de uma API externa ([ZenQuotes](https://zenquotes.io))
+- Tema claro e escuro, salvo entre sessões
+- Configurações: dados do perfil, alternador de tema e preferência de tratamento (Sr., Sra., Srta.)
 
-   ```bash
-   npm install
-   ```
+## Como executar
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Pré-requisitos: Node.js 20+ e o app **Expo Go** no celular (ou um emulador).
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Depois, leia o QR code com o Expo Go ou pressione `a` (Android), `i` (iOS) ou `w` (web) no terminal.
 
-### Other setup steps
+Verificação de tipos:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npx tsc --noEmit
+```
 
-## Learn more
+## Usuários de teste
 
-To learn more about developing your project with Expo, look at the following resources:
+| Perfil        | Usuário | Senha |
+| ------------- | ------- | ----- |
+| Administrador | `admin` | `123` |
+| Usuário comum | `user`  | `123` |
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Estrutura
 
-## Join the community
+```
+src/
+├── app/            # Rotas (Expo Router): cada arquivo é uma tela
+│   ├── _layout.tsx         # Providers (tema, auth, tarefas) + bloqueio por login
+│   └── (tabs)/             # Abas: Home, Tarefas, Configurações
+│       └── tasks/          # Stack: lista, nova, detalhes ([id]), edição
+├── components/     # Componentes reutilizáveis (Header, TaskCard, CustomButton...)
+├── context/        # AuthContext, TaskContent (tarefas), ThemeContext
+├── hooks/          # useAuth, useTasks, useTheme
+├── screens/        # Telas: auth, home, tasks, settings
+├── services/       # AsyncStorage (sessão, tarefas, preferências) e API
+├── types/          # Tipos: user, task, theme, preferences
+└── utils/          # generateId, validação de tarefas
+```
 
-Join our community of developers creating universal apps.
+## Persistência (AsyncStorage)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Chave                        | Conteúdo                                 |
+| ---------------------------- | ---------------------------------------- |
+| `@askflow:session`           | Usuário autenticado                      |
+| `@TaskFlow:tasks:<userId>`   | Tarefas do usuário                       |
+| `@askflow:theme`             | Tema escolhido (`light` / `dark`)        |
+| `@askflow:treatment:<userId>`| Tratamento preferido do usuário          |
+
+## Tema
+
+As cores ficam centralizadas no [`ThemeContext`](src/context/ThemeContext.tsx). As telas devem usar `useTheme()` em vez de valores fixos como `'#FFFFFF'`.
+
+```tsx
+import { useTheme } from "@/hooks/useTheme";
+
+const { colors, isDark, toggleTheme } = useTheme();
+
+<View style={{ backgroundColor: colors.background }}>
+  <Text style={{ color: colors.text }}>Olá</Text>
+</View>;
+```
+
+Cores disponíveis: `background`, `card`, `text`, `primary`, `secondary`, `success`, `error`, `warning`, `border`, `muted`, `onPrimary`.
+
+Enquanto o usuário não escolhe um tema em Configurações, o app segue o tema do sistema.
+
+## Equipe
+
+| #   | Responsabilidade                              |
+| --- | --------------------------------------------- |
+| 1   | Autenticação e sessão                         |
+| 2   | CRUD de tarefas e persistência                |
+| 3   | Navegação e telas de tarefas                  |
+| 4   | Home, API e componentes reutilizáveis         |
+| 5   | Tema, Configurações, acessibilidade e entrega |
