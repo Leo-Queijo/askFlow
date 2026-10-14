@@ -1,12 +1,23 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { ActivityIndicator, StyleSheet, useColorScheme, View } from 'react-native';
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+  Slot,
+} from 'expo-router';
+import * as SplashScreen from "expo-splash-screen";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  useColorScheme,
+  View,
+} from "react-native";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
-import { AuthProvider } from '@/context/AuthContext';
-import { useAuth } from '@/hooks/useAuth';
-import { LoginScreen } from '@/screens/auth/LoginScreen';
+import { AnimatedSplashOverlay } from "@/components/animated-icon";
+import AppTabs from "@/components/app-tabs";
+import { AuthProvider } from "@/context/AuthContext";
+import { TaskProvider } from "@/context/TaskContent";
+import { useAuth } from "@/hooks/useAuth";
+import { LoginScreen } from "@/screens/auth/LoginScreen";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -38,11 +49,13 @@ export default function TabLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider
-        value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
-      >
-        <AuthenticatedLayout />
-      </ThemeProvider>
+      <TaskProvider>
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          <AuthenticatedLayout />
+        </ThemeProvider>
+      </TaskProvider>
     </AuthProvider>
   );
 }
@@ -50,7 +63,7 @@ export default function TabLayout() {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
