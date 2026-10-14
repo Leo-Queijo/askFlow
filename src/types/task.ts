@@ -1,23 +1,17 @@
-export type TaskStatus =
-  | 'pendente'
-  | 'em_andamento'
-  | 'concluida';
+export type TaskStatus = "pendente" | "em_andamento" | "concluida";
 
-export type TaskPriority =
-  | 'baixa'
-  | 'media'
-  | 'alta';
+export type TaskPriority = "baixa" | "media" | "alta";
 
 export type TaskCategory =
-  | 'pessoal'
-  | 'estudos'
-  | 'trabalho'
-  | 'saude'
-  | 'outros';
+  | "pessoal"
+  | "estudos"
+  | "trabalho"
+  | "saude"
+  | "outros";
 
 export interface Task {
   id: string;
-  userId: string;
+  userId: number;
   title: string;
   description: string;
   status: TaskStatus;
@@ -27,9 +21,6 @@ export interface Task {
   updatedAt: string;
 }
 
-export type TaskInput = Omit<
-  Task,
-  'id' | 'userId' | 'createdAt' | 'updatedAt'
->;
+export type TaskInput = Omit<Task, "id" | "userId" | "createdAt" | "updatedAt">;
 
-export type TaskStatusFilter = 'todas' | TaskStatus;
+export type TaskStatusFilter = "todas" | TaskStatus;

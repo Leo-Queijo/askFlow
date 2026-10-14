@@ -1,26 +1,19 @@
 import React, {
-    createContext,
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from 'react';
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from "../hooks/useAuth";
 
-import {
-    Task,
-    TaskInput,
-    TaskStatusFilter,
-} from '../types/task';
+import { Task, TaskInput, TaskStatusFilter } from "../types/task";
 
-import {
-    getTasks as loadTasks,
-    saveTasks,
-} from '../services/taskStorage';
+import { getTasks as loadTasks, saveTasks } from "../services/taskStorage";
 
-import { generateId } from '../utils/generateID';
-import { validateTask } from '../utils/validation';
+import { generateId } from "../utils/generateID";
+import { validateTask } from "../utils/validation";
 
 interface TaskContextData {
   tasks: Task[];
@@ -28,10 +21,7 @@ interface TaskContextData {
   error: string | null;
 
   addTask: (input: TaskInput) => Promise<Task>;
-  updateTask: (
-    id: string,
-    input: TaskInput,
-  ) => Promise<Task>;
+  updateTask: (id: string, input: TaskInput) => Promise<Task>;
   deleteTask: (id: string) => Promise<void>;
 
   getTaskById: (id: string) => Task | undefined;
@@ -48,9 +38,7 @@ interface TaskProviderProps {
   children: React.ReactNode;
 }
 
-export function TaskProvider({
-  children,
-}: TaskProviderProps) {
+export function TaskProvider({ children }: TaskProviderProps) {
   const { user } = useAuth();
 
   const userId = user?.id;
@@ -80,7 +68,7 @@ export function TaskProvider({
         }
       } catch {
         if (active) {
-          setError('Não foi possível carregar as tarefas.');
+          setError("Não foi possível carregar as tarefas.");
         }
       } finally {
         if (active) {
@@ -96,17 +84,13 @@ export function TaskProvider({
     };
   }, [userId]);
 
-  const ensureUser = useCallback((): string => {
+  const ensureUser = useCallback((): number => {
     if (!userId) {
-      throw new Error(
-        'É necessário estar autenticado para gerenciar tarefas.',
-      );
+      throw new Error("É necessário estar autenticado para gerenciar tarefas.");
     }
 
     if (loading) {
-      throw new Error(
-        'Aguarde o carregamento das tarefas.',
-      );
+      throw new Error("Aguarde o carregamento das tarefas.");
     }
 
     return userId;
@@ -122,8 +106,7 @@ export function TaskProvider({
         await saveTasks(currentUserId, nextTasks);
         setTasks(nextTasks);
       } catch {
-        const message =
-          'Não foi possível salvar as tarefas.';
+        const message = "Não foi possível salvar as tarefas.";
 
         setError(message);
         throw new Error(message);
@@ -139,7 +122,7 @@ export function TaskProvider({
       const errors = validateTask(input);
 
       if (errors.length > 0) {
-        throw new Error(errors.join('\n'));
+        throw new Error(errors.join("\n"));
       }
 
       const now = new Date().toISOString();
@@ -164,26 +147,21 @@ export function TaskProvider({
   );
 
   const updateTask = useCallback(
-    async (
-      id: string,
-      input: TaskInput,
-    ): Promise<Task> => {
+    async (id: string, input: TaskInput): Promise<Task> => {
       const currentUserId = ensureUser();
 
       const errors = validateTask(input);
 
       if (errors.length > 0) {
-        throw new Error(errors.join('\n'));
+        throw new Error(errors.join("\n"));
       }
 
       const existingTask = tasks.find(
-        (task) =>
-          task.id === id &&
-          task.userId === currentUserId,
+        (task) => task.id === id && task.userId === currentUserId,
       );
 
       if (!existingTask) {
-        throw new Error('Tarefa não encontrada.');
+        throw new Error("Tarefa não encontrada.");
       }
 
       const updatedTask: Task = {
@@ -197,10 +175,7 @@ export function TaskProvider({
       };
 
       const nextTasks = tasks.map((task) =>
-        task.id === id &&
-        task.userId === currentUserId
-          ? updatedTask
-          : task,
+        task.id === id && task.userId === currentUserId ? updatedTask : task,
       );
 
       await persistTasks(nextTasks);
@@ -215,21 +190,15 @@ export function TaskProvider({
       const currentUserId = ensureUser();
 
       const existingTask = tasks.find(
-        (task) =>
-          task.id === id &&
-          task.userId === currentUserId,
+        (task) => task.id === id && task.userId === currentUserId,
       );
 
       if (!existingTask) {
-        throw new Error('Tarefa não encontrada.');
+        throw new Error("Tarefa não encontrada.");
       }
 
       const nextTasks = tasks.filter(
-        (task) =>
-          !(
-            task.id === id &&
-            task.userId === currentUserId
-          ),
+        (task) => !(task.id === id && task.userId === currentUserId),
       );
 
       await persistTasks(nextTasks);
@@ -243,36 +212,23 @@ export function TaskProvider({
         return undefined;
       }
 
-      return tasks.find(
-        (task) =>
-          task.id === id &&
-          task.userId === userId,
-      );
+      return tasks.find((task) => task.id === id && task.userId === userId);
     },
     [tasks, userId],
   );
 
   const filterTasks = useCallback(
-    (filter: TaskStatusFilter): Task[] => {
-      if (filter === 'todas') {
-        return tasks;
-      }
+  (filter: TaskStatusFilter): Task[] => {
+    if (filter === 'todas') {
+      return tasks;
+    }
 
-      if (filter === 'pendente') {
-        return tasks.filter(
-          (task) =>
-            task.status === 'pendente' ||
-            task.status === 'em_andamento',
-        );
-      }
-
-      return tasks.filter(
-        (task) => task.status === filter,
-      );
-    },
-    [tasks],
-  );
-
+    return tasks.filter(
+      (task) => task.status === filter
+    );
+  },
+  [tasks]
+);
   const refreshTasks = useCallback(async () => {
     if (!userId) {
       setTasks([]);
@@ -286,8 +242,7 @@ export function TaskProvider({
       const storedTasks = await loadTasks(userId);
       setTasks(storedTasks);
     } catch {
-      const message =
-        'Não foi possível carregar as tarefas.';
+      const message = "Não foi possível carregar as tarefas.";
 
       setError(message);
       throw new Error(message);
@@ -321,9 +276,5 @@ export function TaskProvider({
     ],
   );
 
-  return (
-    <TaskContext.Provider value={value}>
-      {children}
-    </TaskContext.Provider>
-  );
+  return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
 }
